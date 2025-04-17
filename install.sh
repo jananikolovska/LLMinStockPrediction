@@ -19,4 +19,5 @@ pip install gdown
 pip install dash
 pip install plotly
 pip install jupyter
+pip install mistralai
 conda deactivate
