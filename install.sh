@@ -20,4 +20,5 @@ pip install dash
 pip install plotly
 pip install jupyter
 pip install mistralai
+pip install seaborn
 conda deactivate
