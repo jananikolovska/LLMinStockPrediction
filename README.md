@@ -31,13 +31,24 @@ For evaluation, RMSE and MAPE were used to assess the models' predictive accurac
 ### Replicability 
 
 #### Step 1: Installation
-Run the following command to install all dependencies in a conda environment named llmtime. Change the cuda version for torch if you don't have cuda 11.8.
+**(Linux)** Run the following command to install all dependencies in a conda environment named llm_stock_prediciton. Change the cuda version for torch if you don't have cuda 11.8.
 
 ```bash
 source install.sh
 ```
 
 After installation, activate the environment with
+```bash
+conda activate llm_stock_prediciton
+```
+**(Windows)** Run the following command to install all dependencies in a conda environment named llm_stock_prediciton. Change the cuda version for torch if you don't have cuda 11.8.
+```bash
+conda create -n llm_stock_prediciton python=3.9
+conda activate llm_stock_prediciton
+```
+```bash
+pip install -r requirements.txt
+```
 ```bash
 conda activate llm_stock_prediciton
 ```
