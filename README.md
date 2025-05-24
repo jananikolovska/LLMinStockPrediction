@@ -1,6 +1,3 @@
-# LLMinStockPrediction
-
-**Summary:** <br>
 # AI for stock market prediction: Using LLMs for TimeSeries Predictions
 
 Project by: Jana Nikolovska <br>
