@@ -31,7 +31,7 @@ For evaluation, RMSE and MAPE were used to assess the models' predictive accurac
 ### Replicability 
 
 #### Step 1: Installation
-_Disclaimer: it needs to be run on Linux or WSL_
+_Disclaimer: it needs to be run on Linux or WSL_ <br/>
 Run the following command to install all dependencies in a conda environment named llm_stock_prediciton. Change the cuda version for torch if you don't have cuda 11.8.
 
 ```bash
