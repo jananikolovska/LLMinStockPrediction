@@ -45,12 +45,7 @@ conda activate llm_stock_prediciton
 ```bash
 conda create -n llm_stock_prediciton python=3.9
 conda activate llm_stock_prediciton
-```
-```bash
 pip install -r requirements.txt
-```
-```bash
-conda activate llm_stock_prediciton
 ```
 If you prefer not using conda, you can also install the dependencies listed in install.sh manually.
 
