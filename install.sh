@@ -21,4 +21,5 @@ pip install plotly
 pip install jupyter
 pip install mistralai
 pip install seaborn
+pip install -U kaleido
 conda deactivate
