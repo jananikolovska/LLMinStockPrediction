@@ -31,7 +31,8 @@ For evaluation, RMSE and MAPE were used to assess the models' predictive accurac
 ### Replicability 
 
 #### Step 1: Installation
-**(Linux)** Run the following command to install all dependencies in a conda environment named llm_stock_prediciton. Change the cuda version for torch if you don't have cuda 11.8.
+_Disclaimer: it needs to be run on Linux or WSL_
+Run the following command to install all dependencies in a conda environment named llm_stock_prediciton. Change the cuda version for torch if you don't have cuda 11.8.
 
 ```bash
 source install.sh
@@ -40,12 +41,6 @@ source install.sh
 After installation, activate the environment with
 ```bash
 conda activate llm_stock_prediciton
-```
-**(Windows)** Run the following command to install all dependencies in a conda environment named llm_stock_prediciton. Change the cuda version for torch if you don't have cuda 11.8.
-```bash
-conda create -n llm_stock_prediciton python=3.9
-conda activate llm_stock_prediciton
-pip install -r requirements.txt
 ```
 If you prefer not using conda, you can also install the dependencies listed in install.sh manually.
 
