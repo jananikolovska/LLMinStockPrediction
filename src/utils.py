@@ -1,6 +1,8 @@
 import pandas as pd
 from statsmodels.tsa.stattools import adfuller
 
+
+
 def load_dataset(path, visualize=True):
     data = pd.read_csv(path)
 
