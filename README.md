@@ -1,14 +1,19 @@
 TODO Notes created from feedback from Mentor <br/>
+👩🏻‍💻Redo readme
+👩🏻‍💻Redo ppt
+👩🏻‍💻write somewhere clearer your pipeline
+<br/>
 Data Understanding (Step 0):  **(deadline 15/7/2025)**
-* yours is presaved to a csv so say sth about that, which ticker you used and time coverage
+* 👩🏻‍💻 yours is presaved to a csv so say sth about that, which ticker you used and time coverage
 * I recommend including information about the dataset's origin, organization, and features. Also, please report split statistics (e.g., train/test size, date ranges) and a high-level rationale for why this dataset is suitable for your task
  
 Data Analysis Notebook: **(deadline 15/7/2025)**
-* add maybe here a better understanding of the code
-* just select the candle plot and remove all the others 
+* ~just select the candle plot and remove all the others~
+* 👩🏻‍💻 add comments, why and comment results 
  
 Project Notebook:
-* comment the splits a bit more
+* 👩🏻‍💻 restructure
+* comment the splits a bit more **(deadline 15/7/2025)**
 * (before you give it for revision) offering deeper commentary on the rationale behind the steps, the inner working, or discussions of the outputs (at the end)
 * for all the metrics you use, it’s important to report not only the interpretation but also the score boundaries (i.e., the [min, max] range). **(deadline 15/7/2025)**
 * the lag size hyperparameter is particularly critical, and it would be beneficial to include a comparison of results across multiple values deadline(15/7/2025)
