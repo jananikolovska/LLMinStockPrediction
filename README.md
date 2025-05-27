@@ -1,3 +1,21 @@
+TODO Notes created from feedback from Mentor
+Data Understanding (Step 0):  **(deadline 15/7/2025)**
+* I recommend including information about the dataset's origin, organization, and features. Also, please report split statistics (e.g., train/test size, date ranges) and a high-level rationale for why this dataset is suitable for your task
+ 
+Data Analysis Notebook: **(deadline 15/7/2025)**
+* add maybe here a better understanding of the code
+* just select the candle plot and remove all the others 
+ 
+Project Notebook:
+* comment the splits a bit more
+* (before you give it for revision) offering deeper commentary on the rationale behind the steps, the inner working, or discussions of the outputs (at the end)
+* for all the metrics you use, it’s important to report not only the interpretation but also the score boundaries (i.e., the [min, max] range). **(deadline 15/7/2025)**
+* the lag size hyperparameter is particularly critical, and it would be beneficial to include a comparison of results across multiple values deadline(15/7/2025)
+    * include a plot  **(deadline 15/7/2025)**
+* Find a solution to this (without over crowding the notebook) Toward the end of the notebook, the generation of figure files with randomly generated, uninformative filenames appears as boilerplate with tons of black-box code repetition. **TBD**
+* My primary recommendation is to refine the code and enhance documentation, even summarizing the internal mechanisms of the main methods you implemented and compared—such as how llmtime handles tokenization behind the scenes.  **(deadline 15/7/2025)**)
+* Finally, to add novelty and strengthen your project, I would also suggest incorporating a comparison with TimesFM, a recently released time-series foundation model from Google: https://www.linkedin.com/feed/update/urn:li:activity:7332753027860246528/ **TBD if ever happening**
+
 # AI for stock market prediction: Using LLMs for TimeSeries Predictions
 
 Project by: Jana Nikolovska <br>
