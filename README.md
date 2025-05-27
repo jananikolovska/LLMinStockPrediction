@@ -1,5 +1,6 @@
-TODO Notes created from feedback from Mentor
+TODO Notes created from feedback from Mentor <br/>
 Data Understanding (Step 0):  **(deadline 15/7/2025)**
+* yours is presaved to a csv so say sth about that, which ticker you used and time coverage
 * I recommend including information about the dataset's origin, organization, and features. Also, please report split statistics (e.g., train/test size, date ranges) and a high-level rationale for why this dataset is suitable for your task
  
 Data Analysis Notebook: **(deadline 15/7/2025)**
