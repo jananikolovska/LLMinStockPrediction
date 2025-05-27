@@ -1,7 +1,7 @@
 TODO Notes created from feedback from Mentor <br/>
-👩🏻‍💻Redo readme
-👩🏻‍💻Redo ppt
-👩🏻‍💻write somewhere clearer your pipeline
+👩🏻‍💻Redo readme <br/>
+👩🏻‍💻Redo ppt <br/>
+👩🏻‍💻write somewhere clearer your pipeline <br/>
 <br/>
 Data Understanding (Step 0):  **(deadline 15/7/2025)**
 * 👩🏻‍💻 yours is presaved to a csv so say sth about that, which ticker you used and time coverage
