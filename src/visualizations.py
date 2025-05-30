@@ -6,7 +6,14 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import dash
+import random
+import os
 from dash import Dash, dcc, html, Input, Output
+
+RESULT_IMAGES_PATH = 'visualizations/project'
+
+def random_8_digit_number():
+    return random.randint(10_000_000, 99_999_999)
 
 def plot_open_close(df):
     """Plot Open and Close prices over time."""
@@ -164,3 +171,108 @@ def get_acf_pacf_figure(open_, close_, lags):
 
     fig.update_layout(height=700, width=1000, title_text="Autocorrelation Analysis", showlegend=False)
     return fig
+
+def gain_over_tries(gain, model_name='', hash_number=None):
+    plt.figure(figsize=(5, 3))
+    sns.histplot(gain, bins=8, kde=True, color='skyblue', edgecolor='white', linewidth=1.5)
+    plt.title(f"{model_name} Gain Over Tries", fontsize=14)
+    plt.xlabel("Value")
+    plt.ylabel("Density", fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.tight_layout()
+    if hash_number:
+        filename = os.path.join(RESULT_IMAGES_PATH, f'plot_{hash_number}.png')
+        plt.savefig(filename)
+        plt.close()
+    else:
+        plt.show()
+    
+def plot_eval_over_time(preds_open, preds_close, y_open, y_close, hash_number=None):
+    # Compute actual daily gain (C - O)
+    CO_diff = y_close - y_open
+
+    # Make sure predictions are pandas Series with the same index
+    preds_close = pd.Series(preds_close, index=y_close.index)
+    preds_open = pd.Series(preds_open, index=y_open.index)
+
+    # Prediction directions
+    growth = preds_close > preds_open
+    decline = preds_close < preds_open
+
+    # Calculate daily gain
+    daily_gain = pd.Series(0, index=CO_diff.index, dtype="float64")
+    daily_gain[growth] = CO_diff[growth]
+    daily_gain[decline] = -CO_diff[decline]
+
+    # Cumulative gain
+    cumulative_gain_series = daily_gain.cumsum()
+
+    # Plot both
+    df = pd.DataFrame({
+    'date': list(y_open.index),
+    'Cumulative Gain': cumulative_gain_series,
+    'Daily Gain': daily_gain
+    })
+    
+    fig = go.Figure()
+    
+    fig.add_trace(go.Scatter(
+        x=df['date'],
+        y=df['Cumulative Gain'],
+        mode='lines',
+        name='Cumulative Gain ($)',
+        hovertemplate='Date: %{x}<br>Cumulative Gain: %{y:.2f}<extra></extra>',
+        line=dict(color='green')
+    ))
+    
+    fig.add_trace(go.Bar(
+        x=df['date'],
+        y=df['Daily Gain'],
+        name='Daily Gain ($)',
+        hovertemplate='Date: %{x}<br>Daily Gain: %{y:.2f}<extra></extra>',
+        marker=dict(color='orange'),
+        opacity=0.6
+    ))
+    
+    fig.update_layout(
+        title='Daily and Cumulative Gain Over Time',
+        xaxis_title='Date',
+        yaxis_title='Gain ($)',
+        legend_title='Legend',
+        hovermode='x unified',
+        template='plotly_white',
+        height=400,
+        width=1000
+    )
+
+    if hash_number:
+        filename = os.path.join(RESULT_IMAGES_PATH, f'plot_{hash_number}.png')
+        fig.write_image(filename)
+    else:
+        fig.show()
+    return daily_gain, cumulative_gain_series
+
+def plot_autoregressive_ml_model_results(y_train, y_test, preds, ds_name='', model_name='', hash_number=None):
+    fig = go.Figure()
+    
+    fig.add_trace(go.Scatter(x=y_train.index, y=y_train, mode='lines', name='Historic Data', line=dict(color='blue', width=2)))
+    
+    fig.add_trace(go.Scatter(x=y_test.index, y=preds, mode='lines', name='Predicted Data', line=dict(color='orange', dash='dash', width=2)))
+    
+    fig.add_trace(go.Scatter(x=y_test.index, y=y_test, mode='lines', name='True Data', line=dict(color='green', width=2)))
+    
+    fig.update_layout(
+        title=f"Forecasting Plot {ds_name} {model_name}: Predicted vs True Data",
+        xaxis_title="Time",
+        yaxis_title="Values",
+        template="plotly",
+        showlegend=True,
+    )
+
+    
+    if hash_number:
+        filename = os.path.join(RESULT_IMAGES_PATH, f'plot_{hash_number}.png')
+        fig.write_image(filename)
+    else:
+        fig.show()
+

@@ -1,8 +1,6 @@
 import pandas as pd
 from statsmodels.tsa.stattools import adfuller
 
-
-
 def load_dataset(path, visualize=True):
     data = pd.read_csv(path)
 
@@ -40,6 +38,19 @@ def split_dataset(data, test_size=0.2, ds_name = '', verbose=True):
         print(f'Test {ds_name} length: {len(test)}')
 
     return train, test
+
+def split_time_series(df, train_size, test_size):
+    splits = []
+    start = 0
+    total_len = len(df)
+
+    while start + train_size + test_size <= total_len:
+        train = df.iloc[start:start + train_size]
+        test = df.iloc[start + train_size:start + train_size + test_size]
+        splits.append((train, test))
+        start += train_size + test_size  # move window forward
+
+    return splits
 
 def adf_test(series, label=''):
     print(f"\nADF Test on {label}")
