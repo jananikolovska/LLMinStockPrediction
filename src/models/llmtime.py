@@ -1,6 +1,8 @@
 import matplotlib as plt
 import pandas as pd
 import numpy as np
+from models.utils import grid_iter
+from models.validation_likelihood_tuning import get_autotuned_predictions_data
 
 def plot_preds(train, test, pred_dict, model_name, show_samples=False, hash_function=None):
     """
@@ -36,7 +38,7 @@ def plot_preds(train, test, pred_dict, model_name, show_samples=False, hash_func
     else:
         plt.show()
 
-def get_inference(data, ds_name, num_samples=10, visualize = True):
+def get_inference(data, ds_name, num_samples=10, model_names=None, model_hypers=None, model_predict_fns = None, visualize=True):
     """
         Function adapted from: https://github.com/ngruver/llmtime
         Original author(s): Nicholas Gruver et al.
@@ -48,7 +50,6 @@ def get_inference(data, ds_name, num_samples=10, visualize = True):
         hypers = list(grid_iter(model_hypers[model]))
         pred_dict = get_autotuned_predictions_data(train, test, hypers, num_samples, model_predict_fns[model], verbose=False, parallel=False)
         out[model] = pred_dict
-        print(model)
         if visualize:
             plot_preds(train, test, pred_dict, model, show_samples=True)
     return model, out
@@ -72,7 +73,5 @@ def process_prediction_samples(samples):
     
 def process_llmtime_outputs(open_samples, close_samples):
     sampled_open_predictions = process_prediction_samples(open_samples)
-    # print('tukaaaa')
-    # print(sampled_open_predictions)
     sampled_close_predictions = process_prediction_samples(close_samples)
     return sampled_open_predictions, sampled_close_predictions

@@ -24,7 +24,6 @@ def make_validation_dataset(train, n_val, val_length):
     for train_series in train[:n_val]:
         train_len = max(len(train_series) - val_length, 1)
         train_minus_val, val = train_series[:train_len], train_series[train_len:]
-        print(f'Train length: {len(train_minus_val)}, Val length: {len(val)}')
         train_minus_val_list.append(train_minus_val)
         val_list.append(val)
 

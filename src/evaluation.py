@@ -1,56 +1,57 @@
 import numpy as np
 import pandas as pd
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-# Mean Absolute Percentage Error (MAPE)
-def mape(y_true, y_pred):
-    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
-
-def gain(C, C_pred, O, O_pred):
+def calculate_metrics(actual, predicted):
     """
-    Function adapted from: DISI - Università di Bologna, Cesena
-    Original author(s): Prof. Gianluca Moro, Roberto Pasolini et al.
-    Adapted by: Jana Nikolovska
-    """
-    C_pred = pd.Series(C_pred)
-    O_pred = pd.Series(O_pred)
-    # Calculate the differences between actual and predicted open/close prices
-    CO_diff = C - O  # Difference between actual close and actual open
+    Calculate comprehensive metrics for returns prediction evaluation
     
-    # Compare predicted close with actual open (whether trade will grow or decline)
-    growth = C_pred > O_pred
-    decline = C_pred < O_pred
-    growth.index = CO_diff.index
-    decline.index = CO_diff.index
- 
-    # Calculate the gain (positive difference in growth, negative in decline)
-    return CO_diff[growth].sum() - CO_diff[decline].sum()
+    Args:
+        actual: Array of actual return values
+        predicted: Array of predicted return values
+        
+    Returns:
+        Dictionary of performance metrics
+    """
+    # Convert to numpy arrays for consistent handling
+    actual = np.array(actual)
+    predicted = np.array(predicted)
+    
+    # Basic regression metrics
+    rmse_val = np.sqrt(mean_squared_error(actual, predicted))
+    mae_val = mean_absolute_error(actual, predicted)
+    
+    # R-squared
+    r2_val = r2_score(actual, predicted)
+    
+    # Directional accuracy (very important for returns)
+    actual_direction = np.sign(actual)
+    predicted_direction = np.sign(predicted)
+    directional_accuracy = np.mean(actual_direction == predicted_direction)
+    
+    # Hit rate (percentage of predictions in correct direction)
+    hit_rate = directional_accuracy  # Same as directional accuracy
+    
+    # Sharpe-like ratio for predictions (assuming risk-free rate = 0)
+    if np.std(predicted) > 0:
+        pred_sharpe = np.mean(predicted) / np.std(predicted)
+    else:
+        pred_sharpe = 0
+    
+    # Actual Sharpe ratio
+    if np.std(actual) > 0:
+        actual_sharpe = np.mean(actual) / np.std(actual)
+    else:
+        actual_sharpe = 0
+    
+    return {
+        'RMSE': rmse_val,
+        'MAE': mae_val,
+        'R2': r2_val,
+        'Directional_Accuracy': directional_accuracy,
+        'Hit_Rate': hit_rate,
+        'Predicted_Sharpe': pred_sharpe,
+        'Actual_Sharpe': actual_sharpe
+    }
 
-def roi(C, C_pred, O, O_pred):
-    """
-    Function adapted from: DISI - Università di Bologna, Cesena
-    Original author(s): Prof. Gianluca Moro, Roberto Pasolini et al.
-    Adapted by: Jana Nikolovska
-    """
-    # Calculate mean of the actual open prices
-    mean_open = O.mean()  
-    # Calculate ROI based on gain and mean open price
-    return gain(C, C_pred, O, O_pred) / mean_open
-
-def print_eval(preds_open, preds_close, y_open, y_close, verbose=True):
-    """
-    Function adapted from: DISI - Università di Bologna, Cesena
-    Original author(s): Prof. Gianluca Moro, Roberto Pasolini et al.
-    Adapted by: Jana Nikolovska
-    """
-    # preds_open: Predicted open values
-    # preds_close: Predicted close values
-    # y_open: Actual open values
-    # y_close: Actual close values
-
-    # Print Gain and ROI based on both open and close predictions
-    gain_ = gain(y_close, preds_close, y_open, preds_open)
-    roi_ = roi(y_close, preds_close, y_open, preds_open)
-    if verbose:
-        print("Gain: {:.2f}$".format(gain_))
-        print("ROI: {:.3%}".format(roi_))
-    return gain_, roi_
+    

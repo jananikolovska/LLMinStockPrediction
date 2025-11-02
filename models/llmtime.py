@@ -154,17 +154,19 @@ def generate_predictions(
     completions_list = []
     complete = lambda x: completion_fn(input_str=x, steps=steps*STEP_MULTIPLIER, settings=settings, num_samples=num_samples, temp=temp)
     if parallel and len(input_strs) > 1:
-        print('Running completions in parallel for each input')
         with ThreadPoolExecutor(min(max_concurrent, len(input_strs))) as p:
             completions_list = list(tqdm(p.map(complete, input_strs), total=len(input_strs)))
     else:
         completions_list = [complete(input_str) for input_str in tqdm(input_strs)]
     def completion_to_pred(completion, inv_transform): 
-        pred = handle_prediction(deserialize_str(completion, settings, ignore_last=False, steps=steps), expected_length=steps, strict=strict_handling)
+        deserialized = deserialize_str(completion, settings, ignore_last=False, steps=steps) 
+        pred = handle_prediction(deserialized, expected_length=steps, strict=strict_handling)
         if pred is not None:
-            return inv_transform(pred)
+            result = inv_transform(pred)
+            return result
         else:
-            return None
+            print("❌ Prediction failed - returning None")
+            return None    
     preds = [[completion_to_pred(completion, scaler.inv_transform) for completion in completions] for completions, scaler in zip(completions_list, scalers)]
     return preds, completions_list, input_strs
 
@@ -189,7 +191,6 @@ def get_llmtime_predictions_data(train, test, model, settings, num_samples=10, t
     Returns:
         dict: Dictionary containing predictions, samples, median, NLL/D averaged over each series, and other related information.
     """
-    print('tuka')
     assert model in completion_fns, f'Invalid model {model}, must be one of {list(completion_fns.keys())}'
     completion_fn = completion_fns[model]
     nll_fn = nll_fns[model] if model in nll_fns else None

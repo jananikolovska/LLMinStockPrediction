@@ -1,51 +1,31 @@
 TODO Notes created from feedback from Mentor <br/>
-👩🏻‍💻Redo readme <br/>
 👩🏻‍💻Redo ppt <br/>
-👩🏻‍💻write somewhere clearer your pipeline <br/>
 <br/>
-Data Understanding (Step 0):  **(deadline 15/7/2025)**
-* 👩🏻‍💻 yours is presaved to a csv so say sth about that, which ticker you used and time coverage
-* I recommend including information about the dataset's origin, organization, and features. Also, please report split statistics (e.g., train/test size, date ranges) and a high-level rationale for why this dataset is suitable for your task
- 
-Data Analysis Notebook: **(deadline 15/7/2025)**
-* ~just select the candle plot and remove all the others~
-* 👩🏻‍💻 add comments, why and comment results 
- 
-Project Notebook:
-* 👩🏻‍💻 restructure
-* comment the splits a bit more **(deadline 15/7/2025)**
-* (before you give it for revision) offering deeper commentary on the rationale behind the steps, the inner working, or discussions of the outputs (at the end)
-* for all the metrics you use, it’s important to report not only the interpretation but also the score boundaries (i.e., the [min, max] range). **(deadline 15/7/2025)**
-* the lag size hyperparameter is particularly critical, and it would be beneficial to include a comparison of results across multiple values deadline(15/7/2025)
-    * include a plot  **(deadline 15/7/2025)**
-* Find a solution to this (without over crowding the notebook) Toward the end of the notebook, the generation of figure files with randomly generated, uninformative filenames appears as boilerplate with tons of black-box code repetition. **TBD**
-* My primary recommendation is to refine the code and enhance documentation, even summarizing the internal mechanisms of the main methods you implemented and compared—such as how llmtime handles tokenization behind the scenes.  **(deadline 15/7/2025)**)
-* Finally, to add novelty and strengthen your project, I would also suggest incorporating a comparison with TimesFM, a recently released time-series foundation model from Google: https://www.linkedin.com/feed/update/urn:li:activity:7332753027860246528/ **TBD if ever happening**
 
-# AI for stock market prediction: Using LLMs for TimeSeries Predictions
+# AI for stock market prediction: Using LLMs for TimeSeries Predictions (LLMTime implementation)
 
 Project by: Jana Nikolovska <br>
-Supervised by: Giacomo Frisoni, MSc <br>
+Supervised by: Giacomo Frisoni, MSc <br><!--  -->
 Prof. Gianluca Moro, PhD <br>
 
-ALMA MATER STUDITORIUM - University of Bologna
-May 2025
+ALMA MATER STUDITORIUM - University of Bologna <br>
+November 2025
 
 ---
+
 **Summary:** <br>
 In this project, I explore the use of Large Language Models (LLMs) for time series forecasting, focusing on the task of stock market prediction. The work was proposed and mentored by Prof. Gianluca Moro and Giacomo Frisoni at the University of Bologna.
 
-As a starting point, I used a provided notebook as starting point . The notebook introduces the dataset (historical S&P 500 data via [`yfinance`](https://pypi.org/project/yfinance/)), a baseline linear regression model for comparison, and the *Trading Protocol* — a framework to evaluate forecasting performance by simulating trading strategies.
+As a starting point, I used a provided notebook by my mentors. The notebook introduces the dataset (**historical S&P 500 data via [`yfinance`](https://pypi.org/project/yfinance/)**), a basic linear regression model, which I chose not to include in the final results, that served as an early benchmark and highlighted the underlying complexity of the forecasting problem and finally, the **"Trading Protocol"** — a framework designed to evaluate forecasting performance through simulated trading strategies —that I extended upon to incorporate multiple strategy types and Monte Carlo-based robustness testing.
 
-For the LLM-based forecasting approach, I followed the methodology described in [this paper](https://arxiv.org/pdf/2310.07820) and its [official implementation](https://github.com/ngruver/llmtime/tree/main). The code from the paper has been adapted and extended with additional functionality tailored to the specific requirements of my experiments.
+On the chosen dataset, a traditional **statistical model ARIMA** and **LLM-based forecasting approaches** have been tested and evaluated. For the implementation, I followed the methodology described in [this paper](https://arxiv.org/pdf/2310.07820) and its [official implementation](https://github.com/ngruver/llmtime/tree/main). The code from the paper has been adapted and extended with additional functionality tailored to the specific requirements of my experiments.
 
-_Goal_: <br>
-The goal of this project was to create a similar problem to those of the referenced paper, particularly in terms of train and test sizes. The problem was defined such that with 150 days of value history, the goal was to predict the subsequent 29 days (for both open and closed time series), following an autoregressive approach without using ground truth. 
-* Modifications were made to the Linear Regression model from the baseline notebook. While it still utilizes a lagged dataset for predictions, a simulation of autoregressiveness was incorporated to make it more comparable to autoregressive models. <br>
-The dataset was split into multiple 150-29 train-test sections, and models were trained and evaluated independently on each split. <br>
+The problem was defined comparable to that of the referenced paper, particularly in terms of training and testing proportions. The task was defined such that, given 150 days of historical values, the objective was to predict the subsequent 29 days values following an autoregressive approach without direct access to ground truth during prediction.
 
-_Evaluation_: <br>
-For evaluation, RMSE and MAPE were used to assess the models' predictive accuracy, while a trading protocol was employed to simulate trading and profit. To enhance the results, I averaged the outcomes across the different splits to achieve a more reliable measure of model performance. Various visualizations were included throughout the notebook to enhance the understanding of the results."
+Unlike the provided baseline notebook, which operated directly on price levels, this project instead utilized log returns as the primary time-series input. This choice was motivated by findings from the exploratory data analysis, which indicated that the raw price series exhibited non-stationary behavior — making a dificult target for predicting. Transforming the data into returns helped achieve approximate stationarity, giving a chance to  the models to capture relative changes more effectively.
+
+As mentioned earlier, both statistical and trading-based evaluation methods were used, with greater emphasis placed on the trading metrics (Trading Protocol), while the statistical ones were included primarily for completeness and exploratory insight.
+
 
 ### Overview
 `DATA_ANALYSIS.ipynb` Plotly visualizations and analysis of time series data <br/>

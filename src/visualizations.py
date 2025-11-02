@@ -1,278 +1,201 @@
 import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
-from pandas.plotting import autocorrelation_plot
-import matplotlib.pyplot as plt
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import dash
-import random
-import os
-from dash import Dash, dcc, html, Input, Output
 
-RESULT_IMAGES_PATH = 'visualizations/project'
-
-def random_8_digit_number():
-    return random.randint(10_000_000, 99_999_999)
-
-def plot_open_close(df):
-    """Plot Open and Close prices over time."""
-    df[['Open', 'Close']].plot(figsize=(14, 6), title='Stock Open and Close Prices')
-    plt.ylabel('Price')
-    plt.grid(True)
-    plt.show()
-
-def plot_daily_returns(df):
-    """Plot daily returns and their distribution."""
-    df['Daily Return'].plot(figsize=(12, 4), title='Daily Returns')
-    plt.grid(True)
-    plt.show()
-
-    sns.histplot(df['Daily Return'].dropna(), kde=True, bins=50)
-    plt.title('Distribution of Daily Returns')
-    plt.show()
-
-def plot_rolling_stats(df):
-    """Plot rolling mean and std deviation."""
-    df[['Close', 'Rolling Mean', 'Rolling Std']].plot(figsize=(14, 6))
-    plt.title('Rolling Mean and STD (20 days)')
-    plt.grid(True)
-    plt.show()
-
-def plot_correlation(df):
-    """Scatter plot to visualize correlation between Open and Close."""
-    corr = df['Open'].corr(df['Close'])
-    print(f"Correlation between Open and Close: {corr:.2f}")
-
-    sns.scatterplot(x='Open', y='Close', data=df)
-    plt.title('Open vs Close Price')
-    plt.grid(True)
-    plt.show()
-
-def plot_autocorrelation(df):
-    """Plot autocorrelation of Close prices."""
-    autocorrelation_plot(df['Close'].dropna())
-    plt.title('Autocorrelation of Close Prices')
-    plt.show()
-
-def plot_seasonality(df):
-    """Plot weekly and monthly average prices."""
-    df['Weekday'] = df.index.weekday
-    weekly_avg = df.groupby('Weekday')[['Open', 'Close']].mean()
-    weekly_avg.plot(kind='bar', figsize=(10, 5), title='Average Prices by Weekday')
-    plt.xticks(ticks=range(7), labels=['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], rotation=0)
-    plt.grid(True)
-    plt.show()
-
-    monthly_avg = df.resample('M').mean()
-    monthly_avg[['Open', 'Close']].plot(figsize=(14, 6), title='Monthly Average Prices')
-    plt.grid(True)
-    plt.show()
+def plot_predictions_vs_actual(results_dict, forecast_horizon=30, figsize=(15, 12)):
+    """
+    Plot predicted vs actual returns for all models with subplots
     
-def get_volatility_returns_figure(open_, close_, sliding_window_size):
-    daily_returns_close = close_.pct_change()
-    daily_returns_open = open_.pct_change()
-
-    volatility_open = daily_returns_open.rolling(window=sliding_window_size).std()
-    volatility_close = daily_returns_close.rolling(window=sliding_window_size).std()
-
-    fig = go.Figure(make_subplots(rows=2, cols=2, 
-                                  subplot_titles=[
-                                      'Histogram of Daily Returns (Open)',
-                                      'Rolling Volatility (Open)',
-                                      'Histogram of Daily Returns (Close)',
-                                      'Rolling Volatility (Close)'
-                                  ]
-                                ))
-
-    fig.add_trace(
-        go.Histogram(x=daily_returns_open.dropna(), nbinsx=50, marker_color='blue'),
-        row=1, col=1
-    )
-    fig.add_trace(
-        go.Scatter(x=volatility_open.index, y=volatility_open, mode='lines', line=dict(color='red')),
-        row=1, col=2
-    )
-    fig.add_trace(
-        go.Histogram(x=daily_returns_close.dropna(), nbinsx=50, marker_color='green'),
-        row=2, col=1
-    )
-    fig.add_trace(
-        go.Scatter(x=volatility_close.index, y=volatility_close, mode='lines', line=dict(color='orange')),
-        row=2, col=2
-    )
+    Args:
+        results_dict: Dictionary containing model results
+        forecast_horizon: Number of forecast periods
+        figsize: Figure size tuple
+    """
+    fig, axes = plt.subplots(2, 2, figsize=figsize)
+    fig.suptitle('Predicted vs Actual Returns Comparison', fontsize=16, fontweight='bold')
     
-    fig.update_layout(height=700, width=1000, title_text="Volatility and Returns Analysis", showlegend=False)
-    return fig
-
-
-def get_moving_averages_figure(open_, close_, sliding_window_size):
-    sma_close_ = close_.rolling(window=sliding_window_size).mean()
-    ema_close_ = close_.ewm(span=sliding_window_size, adjust=False).mean()
-    sma_open_ = open_.rolling(window=sliding_window_size).mean()
-    ema_open_ = open_.ewm(span=sliding_window_size, adjust=False).mean()
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=open_.index, y=open_, mode='lines', name='Open', line=dict(color='blue')))
-    fig.add_trace(go.Scatter(x=sma_open_.index, y=sma_open_, mode='lines', name=f'SMA Open {sliding_window_size}', line=dict(color='orange')))
-    fig.add_trace(go.Scatter(x=ema_open_.index, y=ema_open_, mode='lines', name=f'EMA Open {sliding_window_size}', line=dict(color='red')))
-    fig.add_trace(go.Scatter(x=close_.index, y=close_, mode='lines', name='Close', line=dict(color='green')))
-    fig.add_trace(go.Scatter(x=sma_close_.index, y=sma_close_, mode='lines', name=f'SMA Close {sliding_window_size}', line=dict(color='purple')))
-    fig.add_trace(go.Scatter(x=ema_close_.index, y=ema_close_, mode='lines', name=f'EMA Close {sliding_window_size}', line=dict(color='brown')))
-    fig.update_layout(
-        title=f'Moving Averages with Window Size: {sliding_window_size}',
-        xaxis_title='Date',
-        yaxis_title='Price',
-        legend_title='Click to toggle lines',
-        hovermode='x unified',
-        height=600
-    )
-    return fig
-
-
-def get_candlestick_figure(open_, high_, low_, close_, ds_name):
-    fig = go.Figure(data=[
-        go.Candlestick(
-            x=close_.index,
-            open=open_,
-            high=high_,
-            low=low_,
-            close=close_,
-            name=ds_name
-        )
-    ])
-    fig.update_layout(
-        title=f"{ds_name} Candlestick Chart",
-        xaxis_title="Date",
-        yaxis_title="Price",
-        xaxis_rangeslider_visible=False,
-        hovermode="x unified"
-    )
-    return fig
-
-
-def get_acf_pacf_figure(open_, close_, lags):
-    acf_open = acf(open_, nlags=lags, fft=False)
-    pacf_open = pacf(open_, nlags=lags)
-    acf_close = acf(close_, nlags=lags, fft=False)
-    pacf_close = pacf(close_, nlags=lags)
-
-    fig = make_subplots(rows=2, cols=2, subplot_titles=[
-        f"ACF - Open (lags={lags})",
-        f"PACF - Open (lags={lags})",
-        f"ACF - Close (lags={lags})",
-        f"PACF - Close (lags={lags})"
-    ])
-
-    fig.add_trace(go.Bar(x=list(range(len(acf_open))), y=acf_open, name='ACF Open'), row=1, col=1)
-    fig.add_trace(go.Bar(x=list(range(len(pacf_open))), y=pacf_open, name='PACF Open'), row=1, col=2)
-    fig.add_trace(go.Bar(x=list(range(len(acf_close))), y=acf_close, name='ACF Close'), row=2, col=1)
-    fig.add_trace(go.Bar(x=list(range(len(pacf_close))), y=pacf_close, name='PACF Close'), row=2, col=2)
-
-    fig.update_layout(height=700, width=1000, title_text="Autocorrelation Analysis", showlegend=False)
-    return fig
-
-def gain_over_tries(gain, model_name='', hash_number=None):
-    plt.figure(figsize=(5, 3))
-    sns.histplot(gain, bins=8, kde=True, color='skyblue', edgecolor='white', linewidth=1.5)
-    plt.title(f"{model_name} Gain Over Tries", fontsize=14)
-    plt.xlabel("Value")
-    plt.ylabel("Density", fontsize=12)
-    plt.grid(True, linestyle='--', alpha=0.5)
+    models = ['arima', 'gpt3', 'gpt4']
+    model_names = ['ARIMA', 'GPT-3.5', 'GPT-4']
+    colors = ['blue', 'red', 'green']
+    
+    # Time axis for plotting
+    time_axis = range(1, forecast_horizon + 1)
+    
+    # Individual model plots
+    for i, (model_key, model_name, color) in enumerate(zip(models, model_names, colors)):
+        if model_key in results_dict and results_dict[model_key] is not None:
+            row, col = i // 2, i % 2
+            ax = axes[row, col]
+            
+            actual = results_dict[model_key]['actual']
+            predicted = results_dict[model_key]['predictions']
+            
+            ax.plot(time_axis, actual, 'o-', color='black', label='Actual', alpha=0.7, markersize=4)
+            ax.plot(time_axis, predicted, 's--', color=color, label=f'{model_name} Predicted', alpha=0.8, markersize=4)
+            
+            # Calculate and display metrics
+            r2 = results_dict[model_key]['statistical_metrics']['R2']
+            dir_acc = results_dict[model_key]['statistical_metrics']['Directional_Accuracy']
+            
+            ax.set_title(f'{model_name} Predictions\nR² = {r2:.3f}, Dir. Acc. = {dir_acc:.1%}')
+            ax.set_xlabel('Forecast Period')
+            ax.set_ylabel('Returns')
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+    
+    # Combined comparison plot
+    ax_combined = axes[1, 1]
+    ax_combined.clear()
+    
+    # Plot actual values once
+    if any(results_dict[key] is not None for key in models if key in results_dict):
+        # Use actual values from any available model (they should be the same)
+        actual_values = None
+        for model_key in models:
+            if model_key in results_dict and results_dict[model_key] is not None:
+                actual_values = results_dict[model_key]['actual']
+                break
+        
+        if actual_values is not None:
+            ax_combined.plot(time_axis, actual_values, 'o-', color='black', 
+                           label='Actual', linewidth=2, markersize=5, alpha=0.8)
+            
+            # Plot predictions for each model
+            for model_key, model_name, color in zip(models, model_names, colors):
+                if model_key in results_dict and results_dict[model_key] is not None:
+                    predicted = results_dict[model_key]['predictions']
+                    ax_combined.plot(time_axis, predicted, '--', color=color, 
+                                   label=f'{model_name}', linewidth=1.5, alpha=0.7)
+    
+    ax_combined.set_title('All Models Comparison')
+    ax_combined.set_xlabel('Forecast Period')
+    ax_combined.set_ylabel('Returns')
+    ax_combined.legend()
+    ax_combined.grid(True, alpha=0.3)
+    
     plt.tight_layout()
-    if hash_number:
-        filename = os.path.join(RESULT_IMAGES_PATH, f'plot_{hash_number}.png')
-        plt.savefig(filename)
-        plt.close()
+    plt.show()
+
+def plot_cumulative_returns_simulation(results_dict, initial_capital=10000, figsize=(12, 8)):
+    """
+    Plot cumulative returns over time for trading simulation
+    
+    Args:
+        results_dict: Dictionary containing model results
+        initial_capital: Starting capital amount
+        figsize: Figure size tuple
+    """
+    plt.figure(figsize=figsize)
+    
+    models = ['arima', 'gpt3', 'gpt4']
+    model_names = ['ARIMA', 'GPT-3.5', 'GPT-4']
+    colors = ['blue', 'red', 'green']
+    
+    # Create time axis
+    max_periods = 0
+    for model_key in models:
+        if model_key in results_dict and results_dict[model_key] is not None:
+            max_periods = max(max_periods, len(results_dict[model_key]['actual']))
+    
+    time_axis = range(1, max_periods + 1)
+    
+    # Plot buy-and-hold strategy (baseline)
+    if any(results_dict[key] is not None for key in models if key in results_dict):
+        # Get actual returns from any available model
+        actual_returns = None
+        for model_key in models:
+            if model_key in results_dict and results_dict[model_key] is not None:
+                actual_returns = results_dict[model_key]['actual']
+                break
+        
+        if actual_returns is not None:
+            # Calculate buy-and-hold cumulative returns
+            buy_hold_cumulative = [initial_capital]
+            capital = initial_capital
+            for ret in actual_returns:
+                capital = capital * (1 + ret)  # Assuming full investment each period
+                buy_hold_cumulative.append(capital)
+            
+            plt.plot(range(len(buy_hold_cumulative)), buy_hold_cumulative, 
+                    '--', color='gray', label='Buy & Hold', linewidth=2, alpha=0.8)
+    
+    # Plot each model's trading performance
+    for model_key, model_name, color in zip(models, model_names, colors):
+        if model_key in results_dict and results_dict[model_key] is not None:
+            # Simulate cumulative trading returns
+            predicted_returns = results_dict[model_key]['predictions']
+            actual_returns = results_dict[model_key]['actual']
+            
+            # Simple simulation: invest when predicted return > 0
+            cumulative_capital = [initial_capital]
+            capital = initial_capital
+            
+            for pred_ret, actual_ret in zip(predicted_returns, actual_returns):
+                if pred_ret > 0:  # Buy signal
+                    capital = capital * (1 + actual_ret)
+                else:  # Hold cash (assume 0% return)
+                    pass  # Capital stays same
+                cumulative_capital.append(capital)
+            
+            plt.plot(range(len(cumulative_capital)), cumulative_capital, 
+                    '-', color=color, label=f'{model_name} Trading', linewidth=2)
+    
+    plt.title('Cumulative Trading Performance Comparison', fontsize=14, fontweight='bold')
+    plt.xlabel('Trading Period')
+    plt.ylabel('Portfolio Value ($)')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    
+    # Add starting capital line
+    plt.axhline(y=initial_capital, color='black', linestyle=':', alpha=0.5, label='Initial Capital')
+    
+    plt.tight_layout()
+    plt.show()
+
+
+def create_performance_summary_table(results_dict):
+    """
+    Create a comprehensive performance summary table
+    
+    Args:
+        results_dict: Dictionary containing model results
+    """
+    import pandas as pd
+    
+    models = ['arima', 'gpt3', 'gpt4']
+    model_names = ['ARIMA', 'GPT-3.5', 'GPT-4']
+    
+    summary_data = []
+    
+    for model_key, model_name in zip(models, model_names):
+        if model_key in results_dict and results_dict[model_key] is not None:
+            stats = results_dict[model_key]['statistical_metrics']
+            by_strategy = results_dict[model_key]['by_strategy']
+            
+            # Find best strategy by return
+            best_strategy = max(by_strategy.keys(), 
+                              key=lambda s: by_strategy[s]['summary']['avg_total_return'])
+            best_metrics = by_strategy[best_strategy]['summary']
+            
+            summary_data.append({
+                'Model': model_name,
+                'RMSE': f"{stats['RMSE']:.6f}",
+                'MAE': f"{stats['MAE']:.6f}",
+                'R²': f"{stats['R2']:.4f}",
+                'Directional Accuracy': f"{stats['Directional_Accuracy']:.2%}",
+                'Total Return': f"{best_metrics['avg_total_return']:.2%}",
+                'Final Capital': f"${best_metrics['avg_final_capital']:.2f}",
+                'Profitable Trades': f"{best_metrics['avg_profitable_pct']:.2%}",
+                'Total Trades': f"{best_metrics['avg_num_trades']:.1f}",
+                'Best Strategy': best_strategy
+            })
+    
+    if summary_data:
+        df = pd.DataFrame(summary_data)
+        print("\n" + "="*80)
+        print("COMPREHENSIVE PERFORMANCE SUMMARY TABLE")
+        print("="*80)
+        print(df.to_string(index=False))
+        print("="*80)
+        return df
     else:
-        plt.show()
-    
-def plot_eval_over_time(preds_open, preds_close, y_open, y_close, hash_number=None):
-    # Compute actual daily gain (C - O)
-    CO_diff = y_close - y_open
-
-    # Make sure predictions are pandas Series with the same index
-    preds_close = pd.Series(preds_close, index=y_close.index)
-    preds_open = pd.Series(preds_open, index=y_open.index)
-
-    # Prediction directions
-    growth = preds_close > preds_open
-    decline = preds_close < preds_open
-
-    # Calculate daily gain
-    daily_gain = pd.Series(0, index=CO_diff.index, dtype="float64")
-    daily_gain[growth] = CO_diff[growth]
-    daily_gain[decline] = -CO_diff[decline]
-
-    # Cumulative gain
-    cumulative_gain_series = daily_gain.cumsum()
-
-    # Plot both
-    df = pd.DataFrame({
-    'date': list(y_open.index),
-    'Cumulative Gain': cumulative_gain_series,
-    'Daily Gain': daily_gain
-    })
-    
-    fig = go.Figure()
-    
-    fig.add_trace(go.Scatter(
-        x=df['date'],
-        y=df['Cumulative Gain'],
-        mode='lines',
-        name='Cumulative Gain ($)',
-        hovertemplate='Date: %{x}<br>Cumulative Gain: %{y:.2f}<extra></extra>',
-        line=dict(color='green')
-    ))
-    
-    fig.add_trace(go.Bar(
-        x=df['date'],
-        y=df['Daily Gain'],
-        name='Daily Gain ($)',
-        hovertemplate='Date: %{x}<br>Daily Gain: %{y:.2f}<extra></extra>',
-        marker=dict(color='orange'),
-        opacity=0.6
-    ))
-    
-    fig.update_layout(
-        title='Daily and Cumulative Gain Over Time',
-        xaxis_title='Date',
-        yaxis_title='Gain ($)',
-        legend_title='Legend',
-        hovermode='x unified',
-        template='plotly_white',
-        height=400,
-        width=1000
-    )
-
-    if hash_number:
-        filename = os.path.join(RESULT_IMAGES_PATH, f'plot_{hash_number}.png')
-        fig.write_image(filename)
-    else:
-        fig.show()
-    return daily_gain, cumulative_gain_series
-
-def plot_autoregressive_ml_model_results(y_train, y_test, preds, ds_name='', model_name='', hash_number=None):
-    fig = go.Figure()
-    
-    fig.add_trace(go.Scatter(x=y_train.index, y=y_train, mode='lines', name='Historic Data', line=dict(color='blue', width=2)))
-    
-    fig.add_trace(go.Scatter(x=y_test.index, y=preds, mode='lines', name='Predicted Data', line=dict(color='orange', dash='dash', width=2)))
-    
-    fig.add_trace(go.Scatter(x=y_test.index, y=y_test, mode='lines', name='True Data', line=dict(color='green', width=2)))
-    
-    fig.update_layout(
-        title=f"Forecasting Plot {ds_name} {model_name}: Predicted vs True Data",
-        xaxis_title="Time",
-        yaxis_title="Values",
-        template="plotly",
-        showlegend=True,
-    )
-
-    
-    if hash_number:
-        filename = os.path.join(RESULT_IMAGES_PATH, f'plot_{hash_number}.png')
-        fig.write_image(filename)
-    else:
-        fig.show()
-
+        print("No valid model data available for summary table")
+        return None
