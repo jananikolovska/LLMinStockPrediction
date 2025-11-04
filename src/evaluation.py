@@ -1,57 +1,48 @@
 import numpy as np
-import pandas as pd
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 def calculate_metrics(actual, predicted):
     """
-    Calculate comprehensive metrics for returns prediction evaluation
-    
-    Args:
-        actual: Array of actual return values
-        predicted: Array of predicted return values
-        
-    Returns:
-        Dictionary of performance metrics
+    Calculate metrics for multiple series of predictions.
+    If actual and predicted are lists of lists, compute per-series metrics and average them.
     """
-    # Convert to numpy arrays for consistent handling
-    actual = np.array(actual)
-    predicted = np.array(predicted)
+    actual = np.array(actual, dtype=object)
+    predicted = np.array(predicted, dtype=object)
     
-    # Basic regression metrics
-    rmse_val = np.sqrt(mean_squared_error(actual, predicted))
-    mae_val = mean_absolute_error(actual, predicted)
-    
-    # R-squared
-    r2_val = r2_score(actual, predicted)
-    
-    # Directional accuracy (very important for returns)
-    actual_direction = np.sign(actual)
-    predicted_direction = np.sign(predicted)
-    directional_accuracy = np.mean(actual_direction == predicted_direction)
-    
-    # Hit rate (percentage of predictions in correct direction)
-    hit_rate = directional_accuracy  # Same as directional accuracy
-    
-    # Sharpe-like ratio for predictions (assuming risk-free rate = 0)
-    if np.std(predicted) > 0:
-        pred_sharpe = np.mean(predicted) / np.std(predicted)
-    else:
-        pred_sharpe = 0
-    
-    # Actual Sharpe ratio
-    if np.std(actual) > 0:
-        actual_sharpe = np.mean(actual) / np.std(actual)
-    else:
-        actual_sharpe = 0
-    
-    return {
-        'RMSE': rmse_val,
-        'MAE': mae_val,
-        'R2': r2_val,
-        'Directional_Accuracy': directional_accuracy,
-        'Hit_Rate': hit_rate,
-        'Predicted_Sharpe': pred_sharpe,
-        'Actual_Sharpe': actual_sharpe
+    n_series = len(actual)
+    metrics_list = []
+
+    for a, p in zip(actual, predicted):
+        a = np.array(a)
+        p = np.array(p)
+
+        rmse_val = np.sqrt(mean_squared_error(a, p))
+        mae_val = mean_absolute_error(a, p)
+        r2_val = r2_score(a, p)
+
+        actual_direction = np.sign(a)
+        predicted_direction = np.sign(p)
+        directional_accuracy = np.mean(actual_direction == predicted_direction)
+
+        # Sharpe ratios
+        pred_sharpe = np.mean(p) / np.std(p) if np.std(p) > 0 else 0
+        actual_sharpe = np.mean(a) / np.std(a) if np.std(a) > 0 else 0
+
+        metrics_list.append({
+            'RMSE': rmse_val,
+            'MAE': mae_val,
+            'R2': r2_val,
+            'Directional_Accuracy': directional_accuracy,
+            'Predicted_Sharpe': pred_sharpe,
+            'Actual_Sharpe': actual_sharpe
+        })
+
+    # Average across series
+    avg_metrics = {
+        k: np.mean([m[k] for m in metrics_list]) for k in metrics_list[0]
     }
+
+    return avg_metrics
+
 
     

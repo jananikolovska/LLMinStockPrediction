@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-def plot_predictions_vs_actual(results_dict, forecast_horizon=30, figsize=(15, 12)):
+def plot_predictions_vs_actual(results_dict, forecast_horizon=30, figsize=(15, 12), idx=0):
     """
     Plot predicted vs actual returns for all models with subplots
     
@@ -25,8 +25,8 @@ def plot_predictions_vs_actual(results_dict, forecast_horizon=30, figsize=(15, 1
             row, col = i // 2, i % 2
             ax = axes[row, col]
             
-            actual = results_dict[model_key]['actual']
-            predicted = results_dict[model_key]['predictions']
+            actual = results_dict[model_key]['actual'][idx]
+            predicted = results_dict[model_key]['predictions'][idx]
             
             ax.plot(time_axis, actual, 'o-', color='black', label='Actual', alpha=0.7, markersize=4)
             ax.plot(time_axis, predicted, 's--', color=color, label=f'{model_name} Predicted', alpha=0.8, markersize=4)
@@ -51,7 +51,7 @@ def plot_predictions_vs_actual(results_dict, forecast_horizon=30, figsize=(15, 1
         actual_values = None
         for model_key in models:
             if model_key in results_dict and results_dict[model_key] is not None:
-                actual_values = results_dict[model_key]['actual']
+                actual_values = results_dict[model_key]['actual'][idx]
                 break
         
         if actual_values is not None:
@@ -61,7 +61,7 @@ def plot_predictions_vs_actual(results_dict, forecast_horizon=30, figsize=(15, 1
             # Plot predictions for each model
             for model_key, model_name, color in zip(models, model_names, colors):
                 if model_key in results_dict and results_dict[model_key] is not None:
-                    predicted = results_dict[model_key]['predictions']
+                    predicted = results_dict[model_key]['predictions'][idx]
                     ax_combined.plot(time_axis, predicted, '--', color=color, 
                                    label=f'{model_name}', linewidth=1.5, alpha=0.7)
     
@@ -74,7 +74,7 @@ def plot_predictions_vs_actual(results_dict, forecast_horizon=30, figsize=(15, 1
     plt.tight_layout()
     plt.show()
 
-def plot_cumulative_returns_simulation(results_dict, initial_capital=10000, figsize=(12, 8)):
+def plot_cumulative_returns_simulation(results_dict, initial_capital=10000, figsize=(12, 8), idx = 0):
     """
     Plot cumulative returns over time for trading simulation
     
@@ -93,7 +93,7 @@ def plot_cumulative_returns_simulation(results_dict, initial_capital=10000, figs
     max_periods = 0
     for model_key in models:
         if model_key in results_dict and results_dict[model_key] is not None:
-            max_periods = max(max_periods, len(results_dict[model_key]['actual']))
+            max_periods = max(max_periods, len(results_dict[model_key]['actual'][idx]))
     
     time_axis = range(1, max_periods + 1)
     
@@ -103,7 +103,7 @@ def plot_cumulative_returns_simulation(results_dict, initial_capital=10000, figs
         actual_returns = None
         for model_key in models:
             if model_key in results_dict and results_dict[model_key] is not None:
-                actual_returns = results_dict[model_key]['actual']
+                actual_returns = results_dict[model_key]['actual'][idx]
                 break
         
         if actual_returns is not None:
@@ -121,8 +121,8 @@ def plot_cumulative_returns_simulation(results_dict, initial_capital=10000, figs
     for model_key, model_name, color in zip(models, model_names, colors):
         if model_key in results_dict and results_dict[model_key] is not None:
             # Simulate cumulative trading returns
-            predicted_returns = results_dict[model_key]['predictions']
-            actual_returns = results_dict[model_key]['actual']
+            predicted_returns = results_dict[model_key]['predictions'][idx]
+            actual_returns = results_dict[model_key]['actual'][idx]
             
             # Simple simulation: invest when predicted return > 0
             cumulative_capital = [initial_capital]

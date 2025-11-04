@@ -71,6 +71,7 @@ def get_autotuned_predictions_data(train, test, hypers, num_samples, get_predict
     if not isinstance(train, list):
         train = [train]
         test = [test]
+    print(f'Starting hyperparameter tuning over {len(hypers)} configurations...')
     if n_val is None:
         n_val = len(train)
     if len(hypers) > 1:
@@ -81,7 +82,7 @@ def get_autotuned_predictions_data(train, test, hypers, num_samples, get_predict
         train_minus_val = list(train_minus_val)
         val = list(val)
         if len(train_minus_val) <= int(0.9*n_val):
-            raise ValueError(f'Removed too many validation series. Only {len(train_minus_val)} out of {len(n_val)} series have length >= {val_length}. Try or decreasing val_length.')
+            raise ValueError(f'Removed too many validation series. Only {len(train_minus_val)} out of {n_val} series have length >= {val_length}. Try or decreasing val_length.')
         val_nlls = []
         def eval_hyper(hyper):
             try:

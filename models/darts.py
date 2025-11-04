@@ -220,12 +220,20 @@ def get_arima_predictions_data(train, test, p=12, d=1, q=0, num_samples=100, **k
                     trend=model.trend,
             )
             nll_all = -all_model.loglikeobs(fit_params)
-            nll_all = nll_all[len(train[i]):].sum()/len(test[i])
+            nll_test_portion = nll_all[len(train[i]):]
+            nll_all = nll_test_portion.sum()/len(test[i])
+            
+            # Apply scaling adjustment (handle array/scalar conversion)
             nll_all -= np.log(scaler.scale_)
-            nll_all = nll_all.item()
+            # Convert to scalar for consistent formatting (subtraction can return array)
+            if isinstance(nll_all, np.ndarray):
+                nll_all = nll_all.item() if nll_all.size == 1 else nll_all.flat[0]
+            
         except np.linalg.LinAlgError:
             rescaled_prediction = np.zeros((num_samples,len(test[i])))
-            # output nan
+            nll_all = np.nan
+        except Exception:
+            rescaled_prediction = np.zeros((num_samples,len(test[i])))
             nll_all = np.nan
 
         samples = pd.DataFrame(rescaled_prediction, columns=test[i].index)
