@@ -15,7 +15,7 @@ In this project, I explore the use of Large Language Models (LLMs) for time seri
 
 As a starting point, I used a provided notebook by my mentors. The notebook introduces the dataset (**historical S&P 500 data via [`yfinance`](https://pypi.org/project/yfinance/)**), a basic linear regression model, which I chose not to include in the final results, that served as an early benchmark and highlighted the underlying complexity of the forecasting problem and finally, the **"Trading Protocol"** — a framework designed to evaluate forecasting performance through simulated trading strategies —that I extended upon to incorporate multiple strategy types and Monte Carlo-based robustness testing.
 
-On the chosen dataset, a traditional **statistical model ARIMA** and **LLM-based forecasting approaches** have been tested and evaluated. For the implementation for **LLM-Time**, I followed the methodology described in [this paper](https://arxiv.org/pdf/2310.07820) and its [official implementation](https://github.com/ngruver/llmtime/tree/main). The code from the paper has been adapted and extended with additional functionality tailored to the specific requirements of my experiments. I also included a comparison with **TimesFM** following the example code from [this blog](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/TimesFM) and [code repository](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/TimesFM).
+On the chosen dataset, a traditional **statistical model ARIMA** and **LLM-based forecasting approaches** have been tested and evaluated. For the implementation for **LLM-Time**, I followed the methodology described in [this paper](https://arxiv.org/pdf/2310.07820) and its [official implementation](https://github.com/ngruver/llmtime/tree/main). The code from the paper has been adapted and extended with additional functionality tailored to the specific requirements of my experiments. I also included a comparison with **TimesFM** following the example code from [this blog](https://research.google/blog/a-decoder-only-foundation-model-for-time-series-forecasting/) and [code repository](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/TimesFM).
 
 The problem was defined comparable to that of the referenced paper, particularly in terms of training and testing proportions. The task was defined such that, given 150 days of historical values, the objective was to predict the subsequent 29 days values following an autoregressive approach without direct access to ground truth during prediction.
 
@@ -27,7 +27,7 @@ As mentioned earlier, both statistical and trading-based evaluation methods were
 ### Overview
 `DATA_ANALYSIS.ipynb` Plotly visualizations and analysis of time series data <br/>
 `PROJECT.ipynb` Inference and evaluation pipeline for **ARIMA** and **LLMTime**. Combined results including TimesFM <br/>
-`PROJECT_timesfm.ipynb` Inference and evaluation pipeline for **TimesFM** (needed to be separated due to different preconditions and environments)
+`PROJECT_timesfm.ipynb` Inference and evaluation pipeline for **TimesFM** (needed to be separated due to different preconditions and environments) <br/>
 `PRESENTATION.pdf` short PowerPoint Presentation <br/>
 
 ### Replicability 
